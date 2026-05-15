@@ -241,9 +241,10 @@ function calculateEstimate(analysis, isEmergency) {
     appliedAdjustments.push({ key: 'emergency', multiplier: mult });
   }
 
-  // Cap total adjustment
-  totalAdjLow = Math.min(totalAdjLow, PRICING_CONFIG.maxAdjustment);
-  totalAdjHigh = Math.min(totalAdjHigh, PRICING_CONFIG.maxAdjustment);
+  // Cap total adjustment — higher cap for structural contact (tree on building)
+  const cap = analysis.structuralContact?.detected ? 1.25 : PRICING_CONFIG.maxAdjustment;
+  totalAdjLow = Math.min(totalAdjLow, cap);
+  totalAdjHigh = Math.min(totalAdjHigh, cap);
 
   let low = Math.round(baseLow * (1 + totalAdjLow));
   let high = Math.round(baseHigh * (1 + totalAdjHigh));
