@@ -10,7 +10,7 @@
   var CONFIG = {
     clientId:    scriptTag?.getAttribute('data-client-id') || '',
     ga4Id:       scriptTag?.getAttribute('data-ga4-id') || '',
-    apiUrl:      scriptTag?.getAttribute('data-api-url') || '',
+    apiUrl:      scriptTag?.getAttribute('data-api-url') || 'https://teletree-estimate.vercel.app',
     logoUrl:     scriptTag?.getAttribute('data-logo-url') || '',
     containerId: scriptTag?.getAttribute('data-container') || 'tt-estimate-widget',
   };
