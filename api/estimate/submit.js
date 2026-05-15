@@ -21,7 +21,8 @@ const PRICING_CONFIG = {
     powerLineProximity:   { min: 0.20, max: 0.35, label: 'Power Line Proximity' },
     limitedAccess:        { min: 0.05, max: 0.15, label: 'Limited Access' },
     hardwoodSpecies:      { min: 0.05, max: 0.10, label: 'Hardwood Species' },
-    deadOrHazardous:      { min: 0.05, max: 0.10, label: 'Dead / Hazardous Tree' },
+    deadOrHazardous:      { min: 0.10, max: 0.20, label: 'Dead / Hazardous Tree' },
+    structuralContact:    { min: 0.30, max: 0.50, label: 'Tree On Structure' },
     emergency:            { min: 0.15, max: 0.30, label: 'Emergency Service' },
   },
 
@@ -102,11 +103,16 @@ Return a JSON object with EXACTLY this structure (no markdown, no code fences, j
   "estimatedTrunkDiameterIn": number (estimated trunk diameter in inches at chest height),
   "canopyDescription": "Brief description of canopy size and density",
   "treeCondition": "healthy", "declining", "dead", or "hazardous",
+  "structuralContact": {
+    "detected": boolean (true if the tree has FALLEN ON or is actively LEANING AGAINST a structure — roof, wall, car, fence, etc.),
+    "description": "What the tree is resting on and the nature of contact"
+  },
+  "autoEmergency": boolean (set to true if structuralContact is detected OR tree is in imminent danger of falling on a structure — this overrides the customer checkbox),
   "proximityToStructure": {
     "detected": boolean,
     "severity": "none", "moderate", or "severe",
     "distanceFt": number or null,
-    "description": "What structure and how close. Remember: the grapple saw system eliminates free-fall risk"
+    "description": "What structure and how close. Remember: the grapple saw system eliminates free-fall risk. If tree is already ON the structure, set structuralContact instead."
   },
   "powerLines": {
     "detected": boolean,
@@ -217,7 +223,17 @@ function calculateEstimate(analysis, isEmergency) {
     appliedAdjustments.push({ key: 'deadOrHazardous', multiplier: mult });
   }
 
-  if (isEmergency) {
+  if (analysis.structuralContact?.detected) {
+    const adj = PRICING_CONFIG.adjustments.structuralContact;
+    const mult = adj.max;
+    totalAdjLow += adj.min;
+    totalAdjHigh += mult;
+    appliedAdjustments.push({ key: 'structuralContact', multiplier: mult });
+  }
+
+  // Auto-detect emergency from Claude's analysis OR customer checkbox
+  const effectiveEmergency = isEmergency || analysis.autoEmergency || false;
+  if (effectiveEmergency) {
     const adj = PRICING_CONFIG.adjustments.emergency;
     const mult = (adj.min + adj.max) / 2;
     totalAdjLow += adj.min;
@@ -391,7 +407,7 @@ module.exports = async function handler(req, res) {
       email,
       phone,
       description,
-      is_emergency: isEmergency || false,
+      is_emergency: isEmergency || analysis.autoEmergency || false,
       photo_urls: photoUrls,
       species: analysis.species,
       species_type: analysis.speciesType,
@@ -425,6 +441,8 @@ module.exports = async function handler(req, res) {
       estimatedHeightFt: analysis.estimatedHeightFt,
       canopyDescription: analysis.canopyDescription,
       treeCondition: analysis.treeCondition,
+      structuralContact: analysis.structuralContact?.detected || false,
+      autoEmergency: analysis.autoEmergency || false,
       difficultyRating: analysis.difficultyRating,
       estimatedTimeLow: estimate.estimatedTimeLow,
       estimatedTimeHigh: estimate.estimatedTimeHigh,
