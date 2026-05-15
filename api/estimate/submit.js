@@ -9,20 +9,24 @@ const PRICING_CONFIG = {
   minimum: 3000,
 
   baseByHeight: [
-    { label: 'Small',      minFt: 0,  maxFt: 30,  low: 3000,  high: 4000  },
-    { label: 'Medium',     minFt: 30, maxFt: 60,  low: 3500,  high: 6000  },
-    { label: 'Large',      minFt: 60, maxFt: 80,  low: 5000,  high: 9000  },
-    { label: 'Very Large', minFt: 80, maxFt: 999, low: 7000,  high: 15000 },
+    { label: 'Small',      minFt: 0,  maxFt: 30,  low: 3000,  high: 3500  },
+    { label: 'Medium',     minFt: 30, maxFt: 60,  low: 3000,  high: 5000  },
+    { label: 'Large',      minFt: 60, maxFt: 80,  low: 3500,  high: 6500  },
+    { label: 'Very Large', minFt: 80, maxFt: 999, low: 5000,  high: 10000 },
   ],
 
+  // Adjustments are ADDITIVE — percentages are summed then applied once to the base
   adjustments: {
-    proximityToStructure: { min: 0.15, max: 0.40, label: 'Proximity to Structure' },
-    powerLineProximity:   { min: 0.15, max: 0.30, label: 'Power Line Proximity' },
-    limitedAccess:        { min: 0.10, max: 0.25, label: 'Limited Access' },
-    hardwoodSpecies:      { min: 0.10, max: 0.20, label: 'Hardwood Species' },
-    deadOrHazardous:      { min: 0.10, max: 0.15, label: 'Dead / Hazardous Tree' },
-    emergency:            { min: 0.25, max: 0.50, label: 'Emergency Service' },
+    proximityToStructure: { min: 0.10, max: 0.20, label: 'Proximity to Structure' },
+    powerLineProximity:   { min: 0.10, max: 0.15, label: 'Power Line Proximity' },
+    limitedAccess:        { min: 0.05, max: 0.15, label: 'Limited Access' },
+    hardwoodSpecies:      { min: 0.05, max: 0.10, label: 'Hardwood Species' },
+    deadOrHazardous:      { min: 0.05, max: 0.10, label: 'Dead / Hazardous Tree' },
+    emergency:            { min: 0.15, max: 0.30, label: 'Emergency Service' },
   },
+
+  // Max total adjustment multiplier (e.g., 0.60 = base can increase by at most 60%)
+  maxAdjustment: 0.60,
 
   crewHoursPerFoot: {
     softwood: 0.08,
@@ -145,58 +149,68 @@ function calculateEstimate(analysis, isEmergency) {
   const tier = PRICING_CONFIG.baseByHeight.find(t => height >= t.minFt && height < t.maxFt)
     || PRICING_CONFIG.baseByHeight[PRICING_CONFIG.baseByHeight.length - 1];
 
-  let low = tier.low;
-  let high = tier.high;
+  const baseLow = tier.low;
+  const baseHigh = tier.high;
 
+  // Additive: sum all applicable adjustment percentages, then apply once
+  let totalAdjLow = 0;
+  let totalAdjHigh = 0;
   const appliedAdjustments = [];
 
   if (analysis.proximityToStructure?.detected && analysis.proximityToStructure.severity !== 'none') {
     const adj = PRICING_CONFIG.adjustments.proximityToStructure;
     const mult = analysis.proximityToStructure.severity === 'severe' ? adj.max : adj.min;
-    low = Math.round(low * (1 + mult));
-    high = Math.round(high * (1 + mult));
+    totalAdjLow += adj.min;
+    totalAdjHigh += mult;
     appliedAdjustments.push({ key: 'proximityToStructure', multiplier: mult });
   }
 
   if (analysis.powerLines?.detected && analysis.powerLines.severity !== 'none') {
     const adj = PRICING_CONFIG.adjustments.powerLineProximity;
     const mult = analysis.powerLines.severity === 'severe' ? adj.max : adj.min;
-    low = Math.round(low * (1 + mult));
-    high = Math.round(high * (1 + mult));
+    totalAdjLow += adj.min;
+    totalAdjHigh += mult;
     appliedAdjustments.push({ key: 'powerLineProximity', multiplier: mult });
   }
 
   if (analysis.accessDifficulty?.level === 'moderate' || analysis.accessDifficulty?.level === 'difficult') {
     const adj = PRICING_CONFIG.adjustments.limitedAccess;
     const mult = analysis.accessDifficulty.level === 'difficult' ? adj.max : adj.min;
-    low = Math.round(low * (1 + mult));
-    high = Math.round(high * (1 + mult));
+    totalAdjLow += adj.min;
+    totalAdjHigh += mult;
     appliedAdjustments.push({ key: 'limitedAccess', multiplier: mult });
   }
 
   if (analysis.speciesType === 'hardwood') {
     const adj = PRICING_CONFIG.adjustments.hardwoodSpecies;
     const mult = (adj.min + adj.max) / 2;
-    low = Math.round(low * (1 + mult));
-    high = Math.round(high * (1 + mult));
+    totalAdjLow += adj.min;
+    totalAdjHigh += mult;
     appliedAdjustments.push({ key: 'hardwoodSpecies', multiplier: mult });
   }
 
   if (analysis.treeCondition === 'dead' || analysis.treeCondition === 'hazardous') {
     const adj = PRICING_CONFIG.adjustments.deadOrHazardous;
     const mult = analysis.treeCondition === 'hazardous' ? adj.max : adj.min;
-    low = Math.round(low * (1 + mult));
-    high = Math.round(high * (1 + mult));
+    totalAdjLow += adj.min;
+    totalAdjHigh += mult;
     appliedAdjustments.push({ key: 'deadOrHazardous', multiplier: mult });
   }
 
   if (isEmergency) {
     const adj = PRICING_CONFIG.adjustments.emergency;
     const mult = (adj.min + adj.max) / 2;
-    low = Math.round(low * (1 + mult));
-    high = Math.round(high * (1 + mult));
+    totalAdjLow += adj.min;
+    totalAdjHigh += mult;
     appliedAdjustments.push({ key: 'emergency', multiplier: mult });
   }
+
+  // Cap total adjustment
+  totalAdjLow = Math.min(totalAdjLow, PRICING_CONFIG.maxAdjustment);
+  totalAdjHigh = Math.min(totalAdjHigh, PRICING_CONFIG.maxAdjustment);
+
+  let low = Math.round(baseLow * (1 + totalAdjLow));
+  let high = Math.round(baseHigh * (1 + totalAdjHigh));
 
   low = Math.max(low, PRICING_CONFIG.minimum);
   high = Math.max(high, PRICING_CONFIG.minimum);
