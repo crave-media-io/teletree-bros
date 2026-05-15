@@ -6,13 +6,13 @@ const { createClient } = require('@supabase/supabase-js');
 // ═══════════════════════════════════════════════════════════════
 
 const PRICING_CONFIG = {
-  minimum: 2000,
+  minimum: 500,
 
   baseByHeight: [
-    { label: 'Small',      minFt: 0,  maxFt: 30,  low: 2000,  high: 3000  },
-    { label: 'Medium',     minFt: 30, maxFt: 60,  low: 2500,  high: 4500  },
-    { label: 'Large',      minFt: 60, maxFt: 80,  low: 3500,  high: 6000  },
-    { label: 'Very Large', minFt: 80, maxFt: 999, low: 5000,  high: 9000  },
+    { label: 'Small',      minFt: 0,  maxFt: 30,  low: 300,   high: 800   },
+    { label: 'Medium',     minFt: 30, maxFt: 60,  low: 600,   high: 1500  },
+    { label: 'Large',      minFt: 60, maxFt: 80,  low: 1200,  high: 2500  },
+    { label: 'Very Large', minFt: 80, maxFt: 999, low: 1800,  high: 4000  },
   ],
 
   // Adjustments are ADDITIVE — percentages are summed then applied once to the base
