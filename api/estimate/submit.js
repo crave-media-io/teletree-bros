@@ -21,6 +21,7 @@ const PRICING_CONFIG = {
     powerLineProximity:   { min: 0.20, max: 0.35, label: 'Power Line Proximity' },
     limitedAccess:        { min: 0.05, max: 0.15, label: 'Limited Access' },
     hardwoodSpecies:      { min: 0.05, max: 0.10, label: 'Hardwood Species' },
+    declining:            { min: 0.05, max: 0.10, label: 'Declining Tree Condition' },
     deadOrHazardous:      { min: 0.10, max: 0.20, label: 'Dead / Hazardous Tree' },
     structuralContact:    { min: 0.30, max: 0.50, label: 'Tree On Structure' },
     emergency:            { min: 0.15, max: 0.30, label: 'Emergency Service' },
@@ -221,6 +222,12 @@ function calculateEstimate(analysis, isEmergency) {
     totalAdjLow += adj.min;
     totalAdjHigh += mult;
     appliedAdjustments.push({ key: 'deadOrHazardous', multiplier: mult });
+  } else if (analysis.treeCondition === 'declining') {
+    const adj = PRICING_CONFIG.adjustments.declining;
+    const mult = adj.max;
+    totalAdjLow += adj.min;
+    totalAdjHigh += mult;
+    appliedAdjustments.push({ key: 'declining', multiplier: mult });
   }
 
   if (analysis.structuralContact?.detected) {
