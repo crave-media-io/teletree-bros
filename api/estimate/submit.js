@@ -10,7 +10,7 @@ const PRICING_CONFIG = {
 
   baseByHeight: [
     { label: 'Small',      minFt: 0,  maxFt: 30,  low: 300,   high: 800   },
-    { label: 'Medium',     minFt: 30, maxFt: 60,  low: 800,   high: 2000  },
+    { label: 'Medium',     minFt: 30, maxFt: 60,  low: 500,   high: 2000  },
     { label: 'Large',      minFt: 60, maxFt: 80,  low: 1200,  high: 2500  },
     { label: 'Very Large', minFt: 80, maxFt: 999, low: 1800,  high: 4000  },
   ],
@@ -100,7 +100,8 @@ Return a JSON object with EXACTLY this structure (no markdown, no code fences, j
   "speciesType": "hardwood" or "softwood",
   "woodDensity": "light", "moderate", or "heavy" (e.g., pine=light, maple=moderate, oak/hickory=heavy),
   "estimatedHeightFt": number (best estimate of tree height in feet — USE REFERENCE OBJECTS),
-  "heightReasoning": "Brief explanation of what reference objects you used to estimate height",
+  "heightConfidence": "high", "moderate", or "low" (high = clear reference objects like buildings or vehicles visible; moderate = some references but not ideal; low = no reliable reference objects in the photo),
+  "heightReasoning": "Brief explanation of what reference objects you used to estimate height, or note if none were available",
   "estimatedTrunkDiameterIn": number (estimated trunk diameter in inches at chest height),
   "canopyDescription": "Brief description of canopy size and density",
   "treeCondition": "healthy", "declining", "dead", or "hazardous",
@@ -448,6 +449,7 @@ module.exports = async function handler(req, res) {
       speciesType: analysis.speciesType,
       woodDensity: analysis.woodDensity,
       estimatedHeightFt: analysis.estimatedHeightFt,
+      heightConfidence: analysis.heightConfidence,
       canopyDescription: analysis.canopyDescription,
       treeCondition: analysis.treeCondition,
       structuralContact: analysis.structuralContact?.detected || false,
