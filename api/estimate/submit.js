@@ -18,7 +18,7 @@ const PRICING_CONFIG = {
   // Adjustments are ADDITIVE — percentages are summed then applied once to the base
   adjustments: {
     proximityToStructure: { min: 0.10, max: 0.20, label: 'Proximity to Structure' },
-    powerLineProximity:   { min: 0.10, max: 0.15, label: 'Power Line Proximity' },
+    powerLineProximity:   { min: 0.20, max: 0.35, label: 'Power Line Proximity' },
     limitedAccess:        { min: 0.05, max: 0.15, label: 'Limited Access' },
     hardwoodSpecies:      { min: 0.05, max: 0.10, label: 'Hardwood Species' },
     deadOrHazardous:      { min: 0.05, max: 0.10, label: 'Dead / Hazardous Tree' },
