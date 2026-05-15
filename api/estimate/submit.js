@@ -94,8 +94,9 @@ ${isEmergency ? 'NOTE: The customer has flagged this as an EMERGENCY / dangerous
 
 Return a JSON object with EXACTLY this structure (no markdown, no code fences, just raw JSON):
 {
-  "species": "Common name of the tree species",
+  "species": "Best guess at common species name — this is presented as a suggestion, not definitive",
   "speciesType": "hardwood" or "softwood",
+  "woodDensity": "light", "moderate", or "heavy" (e.g., pine=light, maple=moderate, oak/hickory=heavy),
   "estimatedHeightFt": number (best estimate of tree height in feet — USE REFERENCE OBJECTS),
   "heightReasoning": "Brief explanation of what reference objects you used to estimate height",
   "estimatedTrunkDiameterIn": number (estimated trunk diameter in inches at chest height),
@@ -420,6 +421,7 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({
       species: analysis.species,
       speciesType: analysis.speciesType,
+      woodDensity: analysis.woodDensity,
       estimatedHeightFt: analysis.estimatedHeightFt,
       canopyDescription: analysis.canopyDescription,
       treeCondition: analysis.treeCondition,
