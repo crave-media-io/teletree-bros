@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TeleTree Bros — Estimate Widget Demo</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #e8ebe4;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+  }
+  .demo-header {
+    text-align: center;
+    margin-bottom: 32px;
+    max-width: 600px;
+  }
+  .demo-header h1 {
+    font-size: 24px;
+    color: #021D05;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .demo-header p {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.6;
+  }
+  .demo-header code {
+    background: rgba(2,29,5,0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  #tt-estimate-widget {
+    width: 100%;
+    max-width: 960px;
+  }
+  .demo-footer {
+    margin-top: 32px;
+    font-size: 12px;
+    color: #888;
+  }
+  .embed-code {
+    margin-top: 32px;
+    background: #021D05;
+    color: #f7f9f4;
+    padding: 20px 24px;
+    border-radius: 10px;
+    max-width: 960px;
+    width: 100%;
+    overflow-x: auto;
+  }
+  .embed-code pre {
+    font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .embed-code .comment { color: #5a6b4e; }
+  .embed-code .tag { color: #86B43C; }
+  .embed-code .attr { color: #FF6600; }
+  .embed-code .val { color: #e8d5c4; }
+</style>
+</head>
+<body>
+
+<div class="demo-header">
+  <h1>Tree Removal Estimate Widget</h1>
+  <p>Preview of the embeddable estimate widget for TeleTree Bros. Install with a single <code>&lt;script&gt;</code> tag.</p>
+</div>
+
+<!-- The widget renders inside this container -->
+<div id="tt-estimate-widget"></div>
+
+<!-- Widget embed script -->
+<script
+  src="./estimate-widget.js"
+  data-client-id="teletree-bros"
+  data-logo-url="./teletreebros-logo.png"
+  data-ga4-id=""
+  data-api-url="http://localhost:3000">
+</script>
+
+<div class="embed-code">
+  <pre><span class="comment">&lt;!-- Paste this where you want the widget to appear --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="val">"tt-estimate-widget"</span><span class="tag">&gt;&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- Add this before &lt;/body&gt; --&gt;</span>
+<span class="tag">&lt;script</span>
+  <span class="attr">src</span>=<span class="val">"https://teletree-bros.vercel.app/estimate-widget.js"</span>
+  <span class="attr">data-client-id</span>=<span class="val">"teletree-bros"</span>
+  <span class="attr">data-ga4-id</span>=<span class="val">"G-XXXXXXXXXX"</span><span class="tag">&gt;&lt;/script&gt;</span></pre>
+</div>
+
+<div class="demo-footer">
+  Crave Media &middot; TeleTree Bros Estimate Widget &middot; Demo
+</div>
+
+</body>
+</html>

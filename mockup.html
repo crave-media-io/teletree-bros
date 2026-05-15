@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TeleTree Bros — Tree Removal Estimate Tool (Mockup)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+    background: #f0f2ed;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+  }
+  .demo-header {
+    text-align: center;
+    margin-bottom: 32px;
+    max-width: 600px;
+  }
+  .demo-header h1 {
+    font-size: 24px;
+    color: #021D05;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .demo-header p {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+  }
+  #tt-estimate-widget {
+    width: 100%;
+    max-width: 960px;
+  }
+  .demo-footer {
+    margin-top: 32px;
+    font-size: 12px;
+    color: #888;
+  }
+</style>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   TELETREE ESTIMATE WIDGET STYLES
+   ═══════════════════════════════════════════════════════════════ */
+
+.tt-widget * { box-sizing: border-box; margin: 0; padding: 0; }
+
+.tt-widget {
+  --green-dark: #021D05;
+  --green-mid: #096034;
+  --green-light: #86B43C;
+  --orange: #FF6600;
+  --white: #FFFFFF;
+  --off-white: #f7f9f4;
+  --gray-light: #e8ebe4;
+  --gray-mid: #888;
+  --gray-dark: #333;
+  --line: rgba(2, 29, 5, 0.1);
+
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 680px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px -20px rgba(2, 29, 5, 0.3), 0 8px 24px -12px rgba(2, 29, 5, 0.15);
+  font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+  color: var(--gray-dark);
+  line-height: 1.55;
+  position: relative;
+}
+
+/* ── SIDEBAR ── */
+
+.tt-sidebar {
+  background: var(--green-dark);
+  color: var(--white);
+  padding: 36px 28px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.tt-sidebar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 80% 10%, rgba(134, 180, 60, 0.08), transparent 50%),
+    radial-gradient(ellipse at 10% 90%, rgba(255, 102, 0, 0.06), transparent 60%);
+  pointer-events: none;
+}
+
+.tt-sidebar > * { position: relative; z-index: 1; }
+
+.tt-logo {
+  max-width: 160px;
+  height: auto;
+  margin-bottom: 24px;
+  display: block;
+}
+
+.tt-sidebar-tagline {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--green-light);
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.tt-sidebar-title {
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.25;
+  margin-bottom: 10px;
+  letter-spacing: -0.3px;
+}
+
+.tt-sidebar-intro {
+  font-size: 13px;
+  opacity: 0.65;
+  line-height: 1.7;
+  margin-bottom: 32px;
+}
+
+/* Step list */
+.tt-steps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tt-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 8px;
+  transition: background 0.25s;
+  cursor: default;
+}
+
+.tt-step.tt-active {
+  background: rgba(134, 180, 60, 0.12);
+}
+
+.tt-step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.4);
+  transition: all 0.25s;
+}
+
+.tt-step.tt-done .tt-step-num,
+.tt-step.tt-active .tt-step-num {
+  background: var(--green-light);
+  color: var(--green-dark);
+}
+
+.tt-step.tt-done .tt-step-num {
+  background: var(--orange);
+  color: var(--white);
+}
+
+.tt-step-info { min-width: 0; }
+
+.tt-step-title {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.tt-step-desc {
+  font-size: 11px;
+  opacity: 0.5;
+  margin-top: 2px;
+}
+
+.tt-step:not(.tt-active):not(.tt-done) .tt-step-title { opacity: 0.5; }
+
+.tt-sidebar-footer {
+  margin-top: auto;
+  font-size: 11px;
+  opacity: 0.35;
+  line-height: 1.6;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ── MAIN CONTENT ── */
+
+.tt-main {
+  background: var(--off-white);
+  padding: 48px 44px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.tt-main-header {
+  margin-bottom: 8px;
+}
+
+.tt-main-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--green-dark);
+  margin-bottom: 6px;
+}
+
+.tt-main-subtitle {
+  font-size: 14px;
+  color: var(--gray-mid);
+  margin-bottom: 28px;
+}
+
+/* ── PHOTO UPLOAD ── */
+
+.tt-upload-area {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.tt-upload-slot {
+  width: 180px;
+  height: 180px;
+  border: 2px dashed var(--gray-light);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--white);
+  position: relative;
+  overflow: hidden;
+}
+
+.tt-upload-slot:hover {
+  border-color: var(--green-light);
+  background: rgba(134, 180, 60, 0.04);
+}
+
+.tt-upload-slot.tt-required {
+  border-color: var(--green-mid);
+  border-style: solid;
+}
+
+.tt-upload-slot.tt-has-photo {
+  border-color: var(--green-light);
+  border-style: solid;
+}
+
+.tt-upload-slot.tt-has-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tt-upload-icon {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 8px;
+  opacity: 0.3;
+}
+
+.tt-upload-label {
+  font-size: 12px;
+  color: var(--gray-mid);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.tt-upload-label strong {
+  color: var(--green-mid);
+  display: block;
+  font-weight: 600;
+}
+
+.tt-upload-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--orange);
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── TEXTAREA ── */
+
+.tt-field-group {
+  margin-bottom: 20px;
+}
+
+.tt-field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green-dark);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.tt-field-hint {
+  font-size: 11px;
+  color: var(--gray-mid);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.tt-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 14px 16px;
+  border: 1px solid var(--gray-light);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  background: var(--white);
+  color: var(--gray-dark);
+  transition: border-color 0.2s;
+}
+
+.tt-textarea:focus {
+  outline: none;
+  border-color: var(--green-light);
+  box-shadow: 0 0 0 3px rgba(134, 180, 60, 0.12);
+}
+
+.tt-textarea::placeholder {
+  color: #bbb;
+}
+
+/* ── CHECKBOX ── */
+
+.tt-checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
+.tt-checkbox-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid var(--gray-light);
+  cursor: pointer;
+  accent-color: var(--orange);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.tt-checkbox-label {
+  font-size: 13px;
+  color: var(--gray-dark);
+  line-height: 1.5;
+}
+
+.tt-checkbox-label.tt-emergency-label {
+  color: var(--orange);
+  font-weight: 600;
+}
+
+/* ── INPUT FIELDS ── */
+
+.tt-input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.tt-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--gray-light);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  background: var(--white);
+  color: var(--gray-dark);
+  transition: border-color 0.2s;
+}
+
+.tt-input:focus {
+  outline: none;
+  border-color: var(--green-light);
+  box-shadow: 0 0 0 3px rgba(134, 180, 60, 0.12);
+}
+
+.tt-input::placeholder { color: #bbb; }
+
+/* ── CONSENT SECTION ── */
+
+.tt-consent-section {
+  background: var(--white);
+  border: 1px solid var(--gray-light);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 8px;
+  margin-bottom: 24px;
+}
+
+.tt-consent-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gray-mid);
+  margin-bottom: 14px;
+}
+
+.tt-consent-section .tt-checkbox-row {
+  margin-bottom: 12px;
+}
+
+.tt-consent-section .tt-checkbox-row:last-child {
+  margin-bottom: 0;
+}
+
+.tt-consent-section .tt-checkbox-label {
+  font-size: 12px;
+  color: #666;
+}
+
+/* ── BUTTONS ── */
+
+.tt-btn-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 24px;
+}
+
+.tt-btn {
+  padding: 14px 32px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  letter-spacing: 0.3px;
+}
+
+.tt-btn-primary {
+  background: var(--green-mid);
+  color: var(--white);
+}
+
+.tt-btn-primary:hover {
+  background: #07502b;
+  box-shadow: 0 4px 16px rgba(9, 96, 52, 0.25);
+}
+
+.tt-btn-primary:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.tt-btn-secondary {
+  background: transparent;
+  color: var(--gray-mid);
+  border: 1px solid var(--gray-light);
+}
+
+.tt-btn-secondary:hover {
+  background: var(--white);
+  color: var(--gray-dark);
+}
+
+.tt-btn-submit {
+  background: var(--orange);
+  color: var(--white);
+}
+
+.tt-btn-submit:hover {
+  background: #e55c00;
+  box-shadow: 0 4px 16px rgba(255, 102, 0, 0.3);
+}
+
+.tt-btn-submit:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ── LOADING / ANALYZING ── */
+
+.tt-loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.tt-loading-spinner {
+  width: 56px;
+  height: 56px;
+  border: 3px solid var(--gray-light);
+  border-top-color: var(--green-mid);
+  border-radius: 50%;
+  animation: ttSpin 0.8s linear infinite;
+  margin-bottom: 28px;
+}
+
+@keyframes ttSpin {
+  to { transform: rotate(360deg); }
+}
+
+.tt-loading-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--green-dark);
+  margin-bottom: 10px;
+}
+
+.tt-loading-subtitle {
+  font-size: 14px;
+  color: var(--gray-mid);
+  max-width: 340px;
+  line-height: 1.6;
+}
+
+.tt-loading-steps {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.tt-loading-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--gray-mid);
+  transition: color 0.3s;
+}
+
+.tt-loading-step.tt-loading-active {
+  color: var(--green-dark);
+  font-weight: 600;
+}
+
+.tt-loading-step.tt-loading-done {
+  color: var(--green-light);
+}
+
+.tt-loading-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gray-light);
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+
+.tt-loading-step.tt-loading-active .tt-loading-dot {
+  background: var(--orange);
+  animation: ttPulse 1s ease-in-out infinite;
+}
+
+.tt-loading-step.tt-loading-done .tt-loading-dot {
+  background: var(--green-light);
+}
+
+@keyframes ttPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.6; }
+}
+
+/* ── ESTIMATE RESULT ── */
+
+.tt-result {
+  flex: 1;
+}
+
+.tt-result-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 20px;
+}
+
+.tt-badge-standard {
+  background: rgba(134, 180, 60, 0.15);
+  color: #5a8a1c;
+}
+
+.tt-badge-complex {
+  background: rgba(255, 102, 0, 0.12);
+  color: #cc5200;
+}
+
+.tt-badge-high {
+  background: rgba(200, 40, 40, 0.1);
+  color: #a02828;
+}
+
+.tt-result-price {
+  margin-bottom: 28px;
+}
+
+.tt-price-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--gray-mid);
+  margin-bottom: 6px;
+}
+
+.tt-price-range {
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--green-dark);
+  letter-spacing: -1px;
+}
+
+.tt-price-range .tt-price-dash {
+  color: var(--gray-light);
+  margin: 0 4px;
+}
+
+.tt-result-note {
+  font-size: 12px;
+  color: var(--gray-mid);
+  background: rgba(255, 102, 0, 0.06);
+  border-left: 3px solid var(--orange);
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+
+.tt-result-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.tt-detail-card {
+  background: var(--white);
+  border: 1px solid var(--gray-light);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.tt-detail-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--gray-mid);
+  margin-bottom: 4px;
+}
+
+.tt-detail-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--green-dark);
+}
+
+.tt-detail-sub {
+  font-size: 11px;
+  color: var(--gray-mid);
+  margin-top: 2px;
+}
+
+.tt-result-factors {
+  margin-bottom: 28px;
+}
+
+.tt-factors-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green-dark);
+  margin-bottom: 12px;
+}
+
+.tt-factor-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.tt-factor-row:last-child {
+  border-bottom: none;
+}
+
+.tt-factor-name {
+  color: var(--gray-dark);
+}
+
+.tt-factor-impact {
+  font-weight: 600;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+.tt-impact-low {
+  background: rgba(134, 180, 60, 0.12);
+  color: #5a8a1c;
+}
+
+.tt-impact-medium {
+  background: rgba(255, 170, 0, 0.12);
+  color: #b37700;
+}
+
+.tt-impact-high {
+  background: rgba(255, 102, 0, 0.12);
+  color: #cc5200;
+}
+
+.tt-result-cta {
+  background: var(--green-dark);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  color: var(--white);
+}
+
+.tt-result-cta p {
+  font-size: 14px;
+  margin-bottom: 14px;
+  opacity: 0.8;
+  line-height: 1.6;
+}
+
+.tt-result-cta .tt-btn {
+  background: var(--orange);
+  color: var(--white);
+}
+
+.tt-result-cta .tt-btn:hover {
+  background: #e55c00;
+}
+
+/* ── REVIEW CARDS ── */
+
+.tt-review-card {
+  background: var(--white);
+  border: 1px solid var(--gray-light);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.tt-review-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.tt-review-card-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gray-mid);
+}
+
+.tt-review-edit {
+  font-size: 12px;
+  color: var(--green-mid);
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.tt-review-edit:hover { color: var(--orange); }
+
+.tt-review-photos {
+  display: flex;
+  gap: 10px;
+}
+
+.tt-review-photo {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--gray-light);
+  border: 1px solid var(--line);
+}
+
+.tt-review-text {
+  font-size: 14px;
+  color: var(--gray-dark);
+  line-height: 1.6;
+}
+
+.tt-review-text strong {
+  color: var(--green-dark);
+}
+
+.tt-emergency-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 102, 0, 0.1);
+  color: var(--orange);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-top: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── STEP VISIBILITY ── */
+
+.tt-step-content { display: none; flex-direction: column; flex: 1; }
+.tt-step-content.tt-visible { display: flex; }
+
+/* ── MOBILE RESPONSIVE ── */
+
+.tt-mobile-progress { display: none; }
+
+@media (max-width: 768px) {
+  .tt-widget {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    border-radius: 12px;
+  }
+
+  .tt-sidebar {
+    padding: 24px 20px 20px;
+  }
+
+  .tt-steps { display: none; }
+  .tt-sidebar-intro { display: none; }
+  .tt-sidebar-footer { display: none; }
+
+  .tt-sidebar-title { font-size: 18px; }
+
+  .tt-mobile-progress {
+    display: flex;
+    gap: 6px;
+    margin-top: 16px;
+  }
+
+  .tt-mobile-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: background 0.3s;
+  }
+
+  .tt-mobile-dot.tt-active { background: var(--green-light); }
+  .tt-mobile-dot.tt-done { background: var(--orange); }
+
+  .tt-main { padding: 28px 20px; }
+
+  .tt-upload-area {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tt-upload-slot {
+    width: 100%;
+    height: 140px;
+  }
+
+  .tt-input-row { grid-template-columns: 1fr; }
+
+  .tt-result-details { grid-template-columns: 1fr; }
+
+  .tt-price-range { font-size: 32px; }
+}
+
+/* ── ANIMATIONS ── */
+
+@keyframes ttFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tt-step-content.tt-visible {
+  animation: ttFadeIn 0.35s ease;
+}
+
+@keyframes ttScaleIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.tt-result-badge {
+  animation: ttScaleIn 0.4s ease 0.2s both;
+}
+
+.tt-result-price {
+  animation: ttFadeIn 0.4s ease 0.3s both;
+}
+</style>
+</head>
+<body>
+
+<div class="demo-header">
+  <h1>Tree Removal Estimate Tool — Mockup</h1>
+  <p>Interactive mockup for the TeleTree Bros embeddable estimate widget. Click through each step to preview the full flow.</p>
+</div>
+
+<div id="tt-estimate-widget">
+  <div class="tt-widget">
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <div class="tt-sidebar">
+      <img src="C:\Users\zacsp\Desktop\01 - Crave Clients\TeleTree Bros\teletreebros logo.png" alt="TeleTree Bros" class="tt-logo">
+      <div class="tt-sidebar-tagline">Higher Reach. Lower Risk.</div>
+      <div class="tt-sidebar-title">Tree Removal<br>Estimate</div>
+      <div class="tt-sidebar-intro">Upload a photo of your tree and receive an instant estimate powered by advanced analysis.</div>
+
+      <ul class="tt-steps" id="tt-step-list">
+        <li class="tt-step tt-active" data-step="1">
+          <div class="tt-step-num">1</div>
+          <div class="tt-step-info">
+            <div class="tt-step-title">Your Tree</div>
+            <div class="tt-step-desc">Photos &amp; description</div>
+          </div>
+        </li>
+        <li class="tt-step" data-step="2">
+          <div class="tt-step-num">2</div>
+          <div class="tt-step-info">
+            <div class="tt-step-title">Contact Info</div>
+            <div class="tt-step-desc">How to reach you</div>
+          </div>
+        </li>
+        <li class="tt-step" data-step="3">
+          <div class="tt-step-num">3</div>
+          <div class="tt-step-info">
+            <div class="tt-step-title">Review &amp; Submit</div>
+            <div class="tt-step-desc">Confirm &amp; get estimate</div>
+          </div>
+        </li>
+      </ul>
+
+      <div class="tt-mobile-progress" id="tt-mobile-dots">
+        <div class="tt-mobile-dot tt-active" data-dot="1"></div>
+        <div class="tt-mobile-dot" data-dot="2"></div>
+        <div class="tt-mobile-dot" data-dot="3"></div>
+      </div>
+
+      <div class="tt-sidebar-footer">
+        TeleTree Bros LLC &middot; Gainesville, GA<br>
+        Licensed &amp; Insured &middot; (770) 652-4249
+      </div>
+    </div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div class="tt-main">
+
+      <!-- ── STEP 1: TREE INFO ── -->
+      <div class="tt-step-content tt-visible" id="tt-step-1">
+        <div class="tt-main-header">
+          <div class="tt-main-title">Tell Us About Your Tree</div>
+          <div class="tt-main-subtitle">Upload a clear photo of the tree and describe the situation.</div>
+        </div>
+
+        <div class="tt-upload-area">
+          <div class="tt-upload-slot tt-required tt-has-photo" id="upload-1">
+            <div class="tt-upload-badge">Required</div>
+            <!-- Placeholder for demo: shows a tree silhouette -->
+            <svg class="tt-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:none;">
+              <path d="M12 16v-8m-4 4l4-4 4 4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <div style="width:100%;height:100%;background:linear-gradient(135deg, #2d5a1e 0%, #4a8c2a 40%, #86B43C 100%);display:flex;align-items:center;justify-content:center;">
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.2" opacity="0.7">
+                <path d="M12 3L4 14h4v7h8v-7h4L12 3z"/>
+              </svg>
+            </div>
+          </div>
+          <div class="tt-upload-slot" id="upload-2">
+            <svg class="tt-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 16v-8m-4 4l4-4 4 4"/>
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+            </svg>
+            <div class="tt-upload-label">
+              <strong>Add Photo</strong>
+              Additional angle
+            </div>
+          </div>
+          <div class="tt-upload-slot" id="upload-3">
+            <svg class="tt-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 16v-8m-4 4l4-4 4 4"/>
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+            </svg>
+            <div class="tt-upload-label">
+              <strong>Add Photo</strong>
+              Additional angle
+            </div>
+          </div>
+        </div>
+
+        <div class="tt-field-group">
+          <label class="tt-field-label">Describe the situation</label>
+          <span class="tt-field-hint">What's going on with the tree? Any concerns about nearby structures, power lines, or access?</span>
+          <textarea class="tt-textarea" placeholder="e.g., Large oak in the backyard, leaning toward the house. Fence on one side, power lines nearby...">Large dead oak in the backyard, approximately 60-70 feet tall. It's leaning toward the house — about 15 feet from the roof. There's a fence on the left side and a power line runs near the top branches. Driveway access from the front.</textarea>
+        </div>
+
+        <label class="tt-checkbox-row">
+          <input type="checkbox" id="tt-emergency">
+          <span class="tt-checkbox-label tt-emergency-label">⚠ This is an emergency or dangerous situation</span>
+        </label>
+
+        <div class="tt-btn-row">
+          <div></div>
+          <button class="tt-btn tt-btn-primary" onclick="goToStep(2)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- ── STEP 2: CONTACT INFO ── -->
+      <div class="tt-step-content" id="tt-step-2">
+        <div class="tt-main-header">
+          <div class="tt-main-title">Your Contact Information</div>
+          <div class="tt-main-subtitle">So we can follow up with any additional questions about your tree.</div>
+        </div>
+
+        <div class="tt-input-row">
+          <div class="tt-field-group">
+            <label class="tt-field-label">First Name</label>
+            <input type="text" class="tt-input" placeholder="John" value="John">
+          </div>
+          <div class="tt-field-group">
+            <label class="tt-field-label">Last Name</label>
+            <input type="text" class="tt-input" placeholder="Smith" value="Smith">
+          </div>
+        </div>
+
+        <div class="tt-input-row">
+          <div class="tt-field-group">
+            <label class="tt-field-label">Email</label>
+            <input type="email" class="tt-input" placeholder="john@example.com" value="john.smith@email.com">
+          </div>
+          <div class="tt-field-group">
+            <label class="tt-field-label">Phone</label>
+            <input type="tel" class="tt-input" placeholder="(770) 555-1234" value="(770) 555-1234">
+          </div>
+        </div>
+
+        <div class="tt-btn-row">
+          <button class="tt-btn tt-btn-secondary" onclick="goToStep(1)">← Back</button>
+          <button class="tt-btn tt-btn-primary" onclick="goToStep(3)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- ── STEP 3: REVIEW & SUBMIT ── -->
+      <div class="tt-step-content" id="tt-step-3">
+        <div class="tt-main-header">
+          <div class="tt-main-title">Review &amp; Submit</div>
+          <div class="tt-main-subtitle">Please confirm your details before we generate your estimate.</div>
+        </div>
+
+        <div class="tt-review-card">
+          <div class="tt-review-card-header">
+            <span class="tt-review-card-title">Photos &amp; Description</span>
+            <a class="tt-review-edit" onclick="goToStep(1)">Edit</a>
+          </div>
+          <div class="tt-review-photos" style="margin-bottom: 12px;">
+            <div class="tt-review-photo" style="background:linear-gradient(135deg, #2d5a1e, #86B43C);"></div>
+          </div>
+          <div class="tt-review-text">
+            Large dead oak in the backyard, approximately 60-70 feet tall. It's leaning toward the house — about 15 feet from the roof. There's a fence on the left side and a power line runs near the top branches.
+          </div>
+        </div>
+
+        <div class="tt-review-card">
+          <div class="tt-review-card-header">
+            <span class="tt-review-card-title">Contact Information</span>
+            <a class="tt-review-edit" onclick="goToStep(2)">Edit</a>
+          </div>
+          <div class="tt-review-text">
+            <strong>John Smith</strong><br>
+            john.smith@email.com<br>
+            (770) 555-1234
+          </div>
+        </div>
+
+        <div class="tt-consent-section">
+          <div class="tt-consent-title">Before We Continue</div>
+          <label class="tt-checkbox-row">
+            <input type="checkbox" checked>
+            <span class="tt-checkbox-label">I understand that the estimate provided is preliminary and that actual pricing is subject to change based on an on-site evaluation by TeleTree Bros.</span>
+          </label>
+          <label class="tt-checkbox-row">
+            <input type="checkbox" checked>
+            <span class="tt-checkbox-label">I agree to be contacted by TeleTree Bros regarding this estimate and related tree removal services.</span>
+          </label>
+        </div>
+
+        <div class="tt-btn-row">
+          <button class="tt-btn tt-btn-secondary" onclick="goToStep(2)">← Back</button>
+          <button class="tt-btn tt-btn-submit" onclick="goToStep(4)">Get My Estimate →</button>
+        </div>
+      </div>
+
+      <!-- ── STEP 4: LOADING / ANALYZING ── -->
+      <div class="tt-step-content" id="tt-step-4">
+        <div class="tt-loading-screen">
+          <div class="tt-loading-spinner"></div>
+          <div class="tt-loading-title">Analyzing Your Tree</div>
+          <div class="tt-loading-subtitle">Our system is reviewing your photos and generating a detailed estimate. This usually takes 15–30 seconds.</div>
+
+          <div class="tt-loading-steps">
+            <div class="tt-loading-step tt-loading-done">
+              <div class="tt-loading-dot"></div>
+              <span>Uploading photos</span>
+            </div>
+            <div class="tt-loading-step tt-loading-done">
+              <div class="tt-loading-dot"></div>
+              <span>Identifying tree species &amp; size</span>
+            </div>
+            <div class="tt-loading-step tt-loading-active">
+              <div class="tt-loading-dot"></div>
+              <span>Evaluating removal complexity</span>
+            </div>
+            <div class="tt-loading-step">
+              <div class="tt-loading-dot"></div>
+              <span>Calculating estimate</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── STEP 5: ESTIMATE RESULT ── -->
+      <div class="tt-step-content" id="tt-step-5">
+        <div class="tt-result">
+          <div class="tt-result-badge tt-badge-complex">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Complex Removal
+          </div>
+
+          <div class="tt-result-price">
+            <div class="tt-price-label">Estimated Cost</div>
+            <div class="tt-price-range">$4,200<span class="tt-price-dash">–</span>$6,800</div>
+          </div>
+
+          <div class="tt-result-note">
+            This estimate is based on photo analysis and may change after an on-site evaluation. A TeleTree Bros team member will reach out to schedule a visit and provide a final quote.
+          </div>
+
+          <div class="tt-result-details">
+            <div class="tt-detail-card">
+              <div class="tt-detail-label">Species</div>
+              <div class="tt-detail-value">Red Oak</div>
+              <div class="tt-detail-sub">Hardwood &middot; Dense canopy</div>
+            </div>
+            <div class="tt-detail-card">
+              <div class="tt-detail-label">Estimated Height</div>
+              <div class="tt-detail-value">60–70 ft</div>
+              <div class="tt-detail-sub">Large tree classification</div>
+            </div>
+            <div class="tt-detail-card">
+              <div class="tt-detail-label">Estimated Time</div>
+              <div class="tt-detail-value">6–8 hours</div>
+              <div class="tt-detail-sub">Full crew with crane</div>
+            </div>
+            <div class="tt-detail-card">
+              <div class="tt-detail-label">Difficulty</div>
+              <div class="tt-detail-value">Complex</div>
+              <div class="tt-detail-sub">Proximity &amp; overhead lines</div>
+            </div>
+          </div>
+
+          <div class="tt-result-factors">
+            <div class="tt-factors-title">Factors Affecting Your Estimate</div>
+            <div class="tt-factor-row">
+              <span class="tt-factor-name">Tree Size (60–70 ft hardwood)</span>
+              <span class="tt-factor-impact tt-impact-high">High Impact</span>
+            </div>
+            <div class="tt-factor-row">
+              <span class="tt-factor-name">Proximity to Structure (15 ft from roof)</span>
+              <span class="tt-factor-impact tt-impact-high">High Impact</span>
+            </div>
+            <div class="tt-factor-row">
+              <span class="tt-factor-name">Power Line Proximity</span>
+              <span class="tt-factor-impact tt-impact-medium">Medium Impact</span>
+            </div>
+            <div class="tt-factor-row">
+              <span class="tt-factor-name">Access (driveway available)</span>
+              <span class="tt-factor-impact tt-impact-low">Low Impact</span>
+            </div>
+            <div class="tt-factor-row">
+              <span class="tt-factor-name">Cleanup &amp; Haul Away</span>
+              <span class="tt-factor-impact tt-impact-medium">Medium Impact</span>
+            </div>
+            <div class="tt-factor-row">
+              <span class="tt-factor-name">Tree Condition (dead/hazardous)</span>
+              <span class="tt-factor-impact tt-impact-medium">Medium Impact</span>
+            </div>
+          </div>
+
+          <div class="tt-result-cta">
+            <p>A member of our team will review your submission and reach out within 1 business day to schedule an on-site evaluation.</p>
+            <button class="tt-btn" onclick="window.open('tel:7706524249')">Call Us: (770) 652-4249</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tt-main -->
+  </div><!-- /tt-widget -->
+</div>
+
+<div class="demo-footer">
+  Crave Media &middot; TeleTree Bros Estimate Tool &middot; Mockup v1
+</div>
+
+<script>
+  let currentStep = 1;
+  const totalSteps = 5; // 3 user steps + loading + result
+
+  function goToStep(step) {
+    // Hide all steps
+    document.querySelectorAll('.tt-step-content').forEach(el => {
+      el.classList.remove('tt-visible');
+    });
+
+    // Show target step
+    document.getElementById('tt-step-' + step).classList.add('tt-visible');
+
+    // Update sidebar steps
+    document.querySelectorAll('.tt-step').forEach(el => {
+      const s = parseInt(el.dataset.step);
+      el.classList.remove('tt-active', 'tt-done');
+      if (step >= 4) {
+        // All steps done during loading/result
+        el.classList.add('tt-done');
+      } else if (s === step) {
+        el.classList.add('tt-active');
+      } else if (s < step) {
+        el.classList.add('tt-done');
+      }
+    });
+
+    // Update mobile dots
+    document.querySelectorAll('.tt-mobile-dot').forEach(el => {
+      const d = parseInt(el.dataset.dot);
+      el.classList.remove('tt-active', 'tt-done');
+      if (step >= 4) {
+        el.classList.add('tt-done');
+      } else if (d === step) {
+        el.classList.add('tt-active');
+      } else if (d < step) {
+        el.classList.add('tt-done');
+      }
+    });
+
+    currentStep = step;
+
+    // If loading step, simulate the analysis
+    if (step === 4) {
+      simulateLoading();
+    }
+  }
+
+  function simulateLoading() {
+    const steps = document.querySelectorAll('#tt-step-4 .tt-loading-step');
+    let idx = 0;
+
+    // Reset all steps
+    steps.forEach(s => {
+      s.classList.remove('tt-loading-done', 'tt-loading-active');
+    });
+    steps[0].classList.add('tt-loading-active');
+
+    const interval = setInterval(() => {
+      if (idx < steps.length) {
+        steps[idx].classList.remove('tt-loading-active');
+        steps[idx].classList.add('tt-loading-done');
+      }
+      idx++;
+      if (idx < steps.length) {
+        steps[idx].classList.add('tt-loading-active');
+      } else {
+        clearInterval(interval);
+        // Show result after a beat
+        setTimeout(() => goToStep(5), 800);
+      }
+    }, 1200);
+  }
+</script>
+
+</body>
+</html>
