@@ -10,7 +10,7 @@ const PRICING_CONFIG = {
 
   baseByHeight: [
     { label: 'Small',      minFt: 0,  maxFt: 30,  low: 300,   high: 800   },
-    { label: 'Medium',     minFt: 30, maxFt: 60,  low: 600,   high: 1500  },
+    { label: 'Medium',     minFt: 30, maxFt: 60,  low: 800,   high: 2000  },
     { label: 'Large',      minFt: 60, maxFt: 80,  low: 1200,  high: 2500  },
     { label: 'Very Large', minFt: 80, maxFt: 999, low: 1800,  high: 4000  },
   ],
@@ -26,7 +26,7 @@ const PRICING_CONFIG = {
   },
 
   // Max total adjustment multiplier (e.g., 0.60 = base can increase by at most 60%)
-  maxAdjustment: 0.60,
+  maxAdjustment: 0.75,
 
   crewHoursPerFoot: {
     softwood: 0.08,
