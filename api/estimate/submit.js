@@ -249,8 +249,9 @@ function calculateEstimate(analysis, isEmergency) {
   let low = Math.round(baseLow * (1 + totalAdjLow));
   let high = Math.round(baseHigh * (1 + totalAdjHigh));
 
-  low = Math.max(low, PRICING_CONFIG.minimum);
-  high = Math.max(high, PRICING_CONFIG.minimum);
+  const floor = analysis.structuralContact?.detected ? 2000 : PRICING_CONFIG.minimum;
+  low = Math.max(low, floor);
+  high = Math.max(high, floor);
 
   // Round to nearest $100
   low = Math.round(low / 100) * 100;
