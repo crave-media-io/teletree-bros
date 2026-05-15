@@ -31,11 +31,11 @@ const PRICING_CONFIG = {
   maxAdjustment: 0.75,
 
   crewHoursPerFoot: {
-    softwood: 0.08,
-    hardwood: 0.12,
+    softwood: 0.04,
+    hardwood: 0.06,
   },
 
-  baseCrewHours: 3,
+  baseCrewHours: 2,
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -87,7 +87,7 @@ Do NOT guess tree height in isolation. Use objects visible in the photo to calib
 - Standard fence: ~4-6 ft tall
 - Adult person: ~5.5-6 ft tall
 - Standard door: ~6.8 ft tall
-Compare the tree height against these references. Count how many "house heights" or "garage doors" tall the tree is. Be precise — most residential trees are 30-60 ft, not 60-80 ft. Overestimating height is a common error.
+Compare the tree height against these references. Count how many "house heights" or "garage doors" tall the tree is. Be precise — most residential trees are 30-60 ft, not 60-80 ft. Overestimating height is a common error. When uncertain or when reference objects are limited, round DOWN rather than up. A tree that could be 25 ft or 35 ft should be estimated at 25-30 ft, not 35-40 ft. Dense conical trees (spruce, fir) often appear taller than they are due to their narrow profile.
 
 Analyze the provided tree photo(s) and the customer's description to assess the removal job.
 
