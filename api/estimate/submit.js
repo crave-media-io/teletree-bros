@@ -128,7 +128,11 @@ async function analyzeTree(photoUrls, description, isEmergency) {
     messages: [{ role: 'user', content }],
   });
 
-  const text = response.content[0].text;
+  let text = response.content[0].text.trim();
+  // Strip markdown code fences if present
+  if (text.startsWith('```')) {
+    text = text.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?\s*```$/, '');
+  }
   return JSON.parse(text);
 }
 
