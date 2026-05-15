@@ -305,7 +305,7 @@ async function sendNotificationEmail(submission, analysis, estimate) {
           <h2 style="color:#021D05;font-size:16px;margin:0 0 16px;">Estimate Provided</h2>
           <div style="font-size:32px;font-weight:700;color:#021D05;margin-bottom:8px;">$${estimate.priceLow.toLocaleString()} – $${estimate.priceHigh.toLocaleString()}</div>
           <div style="font-size:13px;color:#888;margin-bottom:16px;">
-            ${analysis.species || 'Unknown species'} · ${analysis.estimatedHeightFt || '?'} ft · ${analysis.difficultyRating || 'standard'} difficulty · ${estimate.estimatedTimeLow}–${estimate.estimatedTimeHigh} hours
+            ${(analysis.speciesType || 'unknown').charAt(0).toUpperCase() + (analysis.speciesType || '').slice(1)} · ${analysis.estimatedHeightFt || '?'} ft · ${analysis.difficultyRating || 'standard'} difficulty · ${estimate.estimatedTimeLow}–${estimate.estimatedTimeHigh} hours
           </div>
           <table style="width:100%;border-collapse:collapse;font-size:13px;">
             <thead><tr><th style="text-align:left;padding:8px 12px;background:#e8ebe4;border-radius:4px 0 0 0;">Factor</th><th style="text-align:center;padding:8px 12px;background:#e8ebe4;border-radius:0 4px 0 0;">Impact</th></tr></thead>
@@ -329,7 +329,7 @@ async function sendNotificationEmail(submission, analysis, estimate) {
     body: JSON.stringify({
       sender: { name: process.env.FROM_NAME || 'TeleTree Bros', email: process.env.FROM_EMAIL },
       to: recipients,
-      subject: `${submission.isEmergency ? '🚨 EMERGENCY ' : ''}New Estimate: ${submission.firstName} ${submission.lastName} — ${analysis.species || 'Tree Removal'}`,
+      subject: `${submission.isEmergency ? '🚨 EMERGENCY ' : ''}New Estimate: ${submission.firstName} ${submission.lastName} - $${estimate.priceLow.toLocaleString()}–$${estimate.priceHigh.toLocaleString()}`,
       htmlContent: html,
     }),
   });
