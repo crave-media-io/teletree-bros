@@ -6,13 +6,13 @@ const { createClient } = require('@supabase/supabase-js');
 // ═══════════════════════════════════════════════════════════════
 
 const PRICING_CONFIG = {
-  minimum: 3000,
+  minimum: 2000,
 
   baseByHeight: [
-    { label: 'Small',      minFt: 0,  maxFt: 30,  low: 3000,  high: 3500  },
-    { label: 'Medium',     minFt: 30, maxFt: 60,  low: 3000,  high: 5000  },
-    { label: 'Large',      minFt: 60, maxFt: 80,  low: 3500,  high: 6500  },
-    { label: 'Very Large', minFt: 80, maxFt: 999, low: 5000,  high: 10000 },
+    { label: 'Small',      minFt: 0,  maxFt: 30,  low: 2000,  high: 3000  },
+    { label: 'Medium',     minFt: 30, maxFt: 60,  low: 2500,  high: 4500  },
+    { label: 'Large',      minFt: 60, maxFt: 80,  low: 3500,  high: 6000  },
+    { label: 'Very Large', minFt: 80, maxFt: 999, low: 5000,  high: 9000  },
   ],
 
   // Adjustments are ADDITIVE — percentages are summed then applied once to the base
@@ -67,7 +67,25 @@ function corsHeaders(origin) {
 // ═══════════════════════════════════════════════════════════════
 
 function buildAnalysisPrompt(description, isEmergency) {
-  return `You are a tree removal cost estimator for a professional tree service company in North Georgia.
+  return `You are a tree removal cost estimator for TeleTree Bros, a professional tree service company in North Georgia.
+
+IMPORTANT CONTEXT ABOUT EQUIPMENT:
+TeleTree Bros uses a Merlo Roto 50.35 telescopic crane (115-foot reach, 360-degree rotation) with a Woodcracker CS750 grapple saw. This system GRIPS each section of the tree before cutting, then lifts and places it precisely. There is NO free-fall of limbs. The crew operates primarily from the street or driveway, not from the tree itself. This means:
+- Proximity to structures is LESS risky than traditional tree removal — limbs are secured, not dropped
+- Access should be evaluated based on whether the crane can reach the tree from the street, driveway, or nearby clear area
+- Only mark access as "difficult" if there is truly no way to position equipment within reach
+
+HEIGHT ESTIMATION — USE REFERENCE OBJECTS:
+Do NOT guess tree height in isolation. Use objects visible in the photo to calibrate:
+- Standard garage door: ~7 ft tall
+- Single-story house wall: ~9-10 ft (floor to eave)
+- Two-story house: ~20-25 ft to the peak
+- Full-size pickup truck: ~6 ft to cab roof, ~6.5 ft to roof rack
+- Standard trash/recycling bin: ~3.5 ft tall
+- Standard fence: ~4-6 ft tall
+- Adult person: ~5.5-6 ft tall
+- Standard door: ~6.8 ft tall
+Compare the tree height against these references. Count how many "house heights" or "garage doors" tall the tree is. Be precise — most residential trees are 30-60 ft, not 60-80 ft. Overestimating height is a common error.
 
 Analyze the provided tree photo(s) and the customer's description to assess the removal job.
 
@@ -78,7 +96,8 @@ Return a JSON object with EXACTLY this structure (no markdown, no code fences, j
 {
   "species": "Common name of the tree species",
   "speciesType": "hardwood" or "softwood",
-  "estimatedHeightFt": number (best estimate of tree height in feet),
+  "estimatedHeightFt": number (best estimate of tree height in feet — USE REFERENCE OBJECTS),
+  "heightReasoning": "Brief explanation of what reference objects you used to estimate height",
   "estimatedTrunkDiameterIn": number (estimated trunk diameter in inches at chest height),
   "canopyDescription": "Brief description of canopy size and density",
   "treeCondition": "healthy", "declining", "dead", or "hazardous",
@@ -86,7 +105,7 @@ Return a JSON object with EXACTLY this structure (no markdown, no code fences, j
     "detected": boolean,
     "severity": "none", "moderate", or "severe",
     "distanceFt": number or null,
-    "description": "What structure and how close"
+    "description": "What structure and how close. Remember: the grapple saw system eliminates free-fall risk"
   },
   "powerLines": {
     "detected": boolean,
@@ -95,7 +114,7 @@ Return a JSON object with EXACTLY this structure (no markdown, no code fences, j
   },
   "accessDifficulty": {
     "level": "easy", "moderate", or "difficult",
-    "description": "Description of access situation"
+    "description": "Can the crane reach from street or driveway? If yes, access is easy"
   },
   "factors": [
     {
@@ -108,7 +127,7 @@ Return a JSON object with EXACTLY this structure (no markdown, no code fences, j
   "notes": "Any additional observations relevant to removal"
 }
 
-Be realistic and conservative. When uncertain, lean toward higher complexity. The factors array should include 4-6 relevant factors that affect the job difficulty and cost. Always include tree size and cleanup as factors.`;
+Be realistic and calibrated. Most residential jobs are "standard" difficulty. Only rate as "complex" when there are genuine complicating factors even WITH crane/grapple equipment. "high-complexity" should be rare — reserved for truly exceptional situations. The factors array should include 4-6 relevant factors. Always include tree size and cleanup as factors.`;
 }
 
 async function analyzeTree(photoUrls, description, isEmergency) {
